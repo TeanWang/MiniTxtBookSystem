@@ -1,5 +1,9 @@
 package com.qf.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.qf.dao.DBHelper;
 import com.qf.dao.UserDao;
 import com.qf.entity.User;
 
@@ -10,6 +14,8 @@ import com.qf.entity.User;
  *
  */
 public class UserDaoImpl implements UserDao {
+	
+	private DBHelper db = new DBHelper();
 
 	@Override
 	/**
@@ -18,7 +24,8 @@ public class UserDaoImpl implements UserDao {
 	 * @return 添加是否成功
 	 */
 	public boolean addUser(User user) {
-		return false;
+		int result = db.executeUpdate("INSERT INTO tb_user VALUES (?,?)", user.getName(), user.getPassword());
+		return result > 0 ? true : false;
 	}
 
 	@Override
@@ -28,7 +35,19 @@ public class UserDaoImpl implements UserDao {
 	 * @return 返回查询的结果，如果没有此用户则返回<Strong>null</strong>
 	 */
 	public User getUserByName(String name) {
-		return null;
+		ResultSet rs = db.executeQuery("SELECT name,password FROM tb_user WHERE name=?", name);
+		User user = null;
+		try {
+			if(rs.next()) {
+				user = new User();
+				user.setName(rs.getString("name"));
+				user.setPassword(rs.getString("password"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return user;
 	}
+
 
 }
