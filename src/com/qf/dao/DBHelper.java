@@ -18,12 +18,54 @@ public class DBHelper {
 	private PreparedStatement pstmt;
 	private ResultSet rs;
 	
-	
-	public ResultSet executeQuery(String sql) {
-		
+	/**
+	 * 执行查询
+	 * <em>用完后需调用该类的close()方法释放资源</em>
+	 * @param sql 查询的SQL语句
+	 * @param params 参数
+	 * @return 查询结果集
+	 */
+	public ResultSet executeQuery(String sql, Object ... params) {
+		open();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			if(params != null) {
+				for (int i = 0; i < params.length; i++) {
+					pstmt.setObject(i + 1, params[i]);
+				}
+			}
+			rs = pstmt.executeQuery();
+			return rs;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
+	/**
+	 * 执行增、删、该
+	 * @param sql 要执行的SQL语句
+	 * @param params 参数
+	 * @return 受影响的行数
+	 */
+	public int executeUpdate(String sql, Object ... params) {
+		open();
+		try {
+			pstmt = conn.prepareStatement(sql);
+			if(params != null) {
+				for (int i = 0; i < params.length; i++) {
+					pstmt.setObject(i + 1, params[i]);
+				}
+			}
+			int result = pstmt.executeUpdate();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		return -1;
+	}
 	
 	/**
 	 * 获取数据库连接
