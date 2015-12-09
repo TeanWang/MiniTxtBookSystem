@@ -81,13 +81,13 @@ public class MiniClient {
 			if (getConnection()) {
 				sendServerCommand(entity);
 				entity = getServerCommand();
-				// 打印登录结果信息
+				// 打印注册结果信息
 				showXingHao(entity.getInfo());
-				if (entity.getIsSuccess()) { // 判断是否登录成功
+				if (entity.getIsSuccess()) { // 判断是否注册成功
 					closeSocket();
 					showLoginWindow(); // 进入登录界面
 				} else {
-					showLoginWindow();
+					showRegisterWindow(); // 注册失败再次进入注册页面
 				}
 			}
 		} else {
