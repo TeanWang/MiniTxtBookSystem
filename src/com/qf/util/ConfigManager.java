@@ -16,7 +16,7 @@ import java.util.Properties;
  */
 public class ConfigManager {
 
-	private static ConfigManager config  = new ConfigManager();
+	private static final ConfigManager config  = new ConfigManager();
 	private Properties properties;
 
 	private ConfigManager() {
