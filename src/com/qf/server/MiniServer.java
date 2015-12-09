@@ -24,9 +24,6 @@ public class MiniServer {
 			ss = new ServerSocket(port);
 			while(true) {
 				Socket socket = ss.accept();
-				
-				
-				
 				//采用线程，每次请求一个线程
 				Thread t = new Thread(new ServerThread(socket));
 				t.start();

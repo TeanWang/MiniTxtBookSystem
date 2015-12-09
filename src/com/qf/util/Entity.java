@@ -11,10 +11,18 @@ public class Entity implements java.io.Serializable {
 	private String command; // 请求的命令
 	private Object Obj; // 客户端和服务器端交互的 数据对象
 	private boolean isSuccess; // 判断命令是否执行成功
-	private String resultInfo; // 返回的信息
+	private String info; // 携带信息
 
 	public Entity(Object obj) {
 		this.Obj = obj;
+	}
+	
+	/**
+	 * 创建带有命令的Entity对象
+	 * @param cmd 命令
+	 */
+	public Entity(String cmd) {
+		this.setCommand(cmd);
 	}
 
 	public Entity() {
@@ -28,12 +36,12 @@ public class Entity implements java.io.Serializable {
 		this.isSuccess = isSuccess;
 	}
 
-	public String getResultInfo() {
-		return resultInfo;
+	public String getInfo() {
+		return info;
 	}
 
-	public void setResultInfo(String resultInfo) {
-		this.resultInfo = resultInfo;
+	public void setInfo(String info) {
+		this.info =info;
 	}
 
 	public String getCommand() {
