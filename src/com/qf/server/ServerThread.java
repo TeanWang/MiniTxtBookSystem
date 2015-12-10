@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import com.qf.biz.BookBiz;
 import com.qf.biz.UserBiz;
+import com.qf.entity.Book;
 import com.qf.entity.User;
 import com.qf.util.Contants;
 import com.qf.util.Entity;
@@ -68,8 +69,24 @@ public class ServerThread implements Runnable {
 			return doRegister(entity);
 		} else if (command.equals(Contants.COMMAND_SHOW_TXT_CATEGORY)) { // 显示小说分类
 			return doShowTxtCategory(entity);
+		} else if (command.equals(Contants.COMMAND_SHOW_TXT_BY_CATEGORY)) { // 显示指定分类下的小说
+			return doShowAllTxtByCategory(entity);
 		}
 		return new Entity();
+	}
+
+	// 显示指定分类下的所有小说
+	public Entity doShowAllTxtByCategory(Entity entity) {
+		List<Book> list = bb.getBookByType(entity.getInfo());
+		entity.setObj(list);
+		entity.setIsSuccess(true);
+		// 日志
+		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		System.out.print(date + "\t=>\t");
+		// 获取客户端的IP地址
+		InetAddress ia = socket.getInetAddress();
+		System.out.println(ia.getHostAddress() + "执行命令：" + entity.getCommand());
+		return entity;
 	}
 
 	// 显示小说分类

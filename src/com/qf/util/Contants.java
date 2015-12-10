@@ -26,5 +26,9 @@ public class Contants {
 	 * 显示小说分类命令
 	 */
 	public static final String COMMAND_SHOW_TXT_CATEGORY = "CMD_SHOW_TXT_CATEGORY";
+	/**
+	 * 获取指定分类下的所有小说命令
+	 */
+	public static final String COMMAND_SHOW_TXT_BY_CATEGORY = "CMD_SHOW_TXT_BY_CATEGORY";
 	
 }

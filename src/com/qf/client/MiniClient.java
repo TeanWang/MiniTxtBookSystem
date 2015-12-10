@@ -11,6 +11,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.qf.entity.Book;
 import com.qf.entity.User;
 import com.qf.util.ConfigManager;
 import com.qf.util.Contants;
@@ -142,6 +143,7 @@ public class MiniClient {
 			closeSocket();
 			// 显示服务器响应信息
 			if(entity.getIsSuccess()) {
+				/* 显示所有小说分类 */
 				@SuppressWarnings("unchecked")
 				List<String> list = (List<String>)entity.getObj();
 				String msg = "";
@@ -149,6 +151,7 @@ public class MiniClient {
 					msg += (i + 1) + ". " + list.get(i) + "\n";
 				}
 				showBoLang(msg + list.size() + ". " + list.get(list.size() - 1));
+				/* 获取用户输入的小说分类 */
 				System.out.print("请选择：");
 				Scanner sc = new Scanner(System.in);
 				boolean flag = true;
@@ -166,12 +169,63 @@ public class MiniClient {
 					}
 				}
 				String type = list.get(choose - 1);
-				System.out.println("您选择了：" + type);
+				showAllTxtByCategory(type); // 显示该分类下的所有小说
 				sc.close();
 			}
 		} else {
 			System.out.println("!-> 链接服务器错误，请稍后再试！");
 		}
+	}
+
+	/**
+	 * 显示type分类下的所有小说
+	 * @param type 小说分类
+	 */
+	public void showAllTxtByCategory(String type) {
+		Entity entity = new Entity(Contants.COMMAND_SHOW_TXT_BY_CATEGORY);
+		entity.setInfo(type);
+		if(getConnection()) {
+			sendServerCommand(entity);
+			entity = getServerCommand();
+			// 输入响应的信息
+			@SuppressWarnings("unchecked")
+			List<Book> list = (List<Book>)entity.getObj();
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println("序号\t书名\t作者\t摘要");
+			for (int i = 0; i < list.size(); i++) {
+				Book book = list.get(i);
+				System.out.println(i + 1 + "\t" + book.getName() + "\t" + book.getAuthor() + "\t" + book.getSummary());
+			}
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.print("下载请选择相应序号，上传小说到该分类下请输入-1，返回上级菜单请输入0：");
+			Scanner sc = new Scanner(System.in);
+			boolean flag = true;
+			int choose = 0;
+			while(flag) {
+				try {
+					choose = sc.nextInt();
+					if(choose > list.size() || choose < -1) {
+						throw new Exception();
+					}
+					flag = false;
+				} catch (Exception e) {
+					sc.nextLine();
+					System.out.print("!-> 您的输入有误，请重新输入：");
+				}
+			}
+			if(choose == -1) {
+				System.out.println("上传"); // 上传新小说到该分类下
+			} else if(choose == 0) {
+				showTxtCategoryWindow(); // 返回上级菜单
+			} else { // 阅读小说，下载小说
+				Book b = list.get(choose - 1);
+				System.out.println(b.getName() + "\t" + b.getAuthor() + "\t" + b.getSummary());
+			}
+			sc.close();
+		} else {
+			System.out.println("!-> 链接服务器错误，请稍后再试！");
+		}
+		
 	}
 
 	/**
