@@ -214,18 +214,43 @@ public class MiniClient {
 				}
 			}
 			if(choose == -1) {
-				System.out.println("上传"); // 上传新小说到该分类下
+				// 上传新小说到该分类下
+				upload(type);
 			} else if(choose == 0) {
 				showTxtCategoryWindow(); // 返回上级菜单
-			} else { // 阅读小说，下载小说
+			} else { 
 				Book b = list.get(choose - 1);
-				System.out.println(b.getName() + "\t" + b.getAuthor() + "\t" + b.getSummary());
+				download(b); // 下载小说
 			}
 			sc.close();
 		} else {
 			System.out.println("!-> 链接服务器错误，请稍后再试！");
 		}
 		
+	}
+	
+	/**
+	 * 小说上传
+	 * @param type 要上传的分类
+	 */
+	public void upload(String type) {
+		showBoLang("当前操作：小说上传");
+		Entity entity = new Entity(Contants.COMMAND_UPLOAD);
+		
+		// TODO 
+		
+	}
+	
+	/**
+	 * 小说下载
+	 * @param b 要下载的小说对象
+	 */
+	public void download(Book b) {
+		showBoLang("当前操作：小说下载");
+		System.out.println(b.getName() + "\t" + b.getAuthor() + "\t" + b.getSummary());
+		Entity entity = new Entity(Contants.COMMAND_DOWNLOAD);
+		entity.setInfo(b.getName()); // 告诉服务器要下载的小说名称
+		// TODO 
 	}
 
 	/**

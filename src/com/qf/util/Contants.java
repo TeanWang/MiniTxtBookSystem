@@ -30,5 +30,13 @@ public class Contants {
 	 * 获取指定分类下的所有小说命令
 	 */
 	public static final String COMMAND_SHOW_TXT_BY_CATEGORY = "CMD_SHOW_TXT_BY_CATEGORY";
+	/**
+	 * 上传命令
+	 */
+	public static final String COMMAND_UPLOAD = "CMD_UPLOAD";
+	/**
+	 * 下载命令
+	 */
+	public static final String COMMAND_DOWNLOAD = "CMD_DOWNLOAD";
 	
 }
