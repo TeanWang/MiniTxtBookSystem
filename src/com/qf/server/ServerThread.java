@@ -8,10 +8,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.qf.biz.BookBiz;
 import com.qf.biz.UserBiz;
 import com.qf.entity.User;
 import com.qf.util.Contants;
@@ -22,6 +24,7 @@ public class ServerThread implements Runnable {
 	private Socket socket;
 
 	private UserBiz ub = new UserBiz();
+	private BookBiz bb = new BookBiz();
 
 	public ServerThread(Socket socket) {
 		this.socket = socket;
@@ -57,14 +60,30 @@ public class ServerThread implements Runnable {
 	 * 
 	 * @param cmd
 	 */
-	public Entity executeCommand(Entity cmd) {
-		String command = cmd.getCommand(); // 获取命令
+	public Entity executeCommand(Entity entity) {
+		String command = entity.getCommand(); // 获取命令
 		if (command.equals(Contants.COMMAND_LOGIN)) { // 登录
-			return doLogin(cmd);
+			return doLogin(entity);
 		} else if (command.equals(Contants.COMMAND_REGISTER)) { // 注册
-			return doRegister(cmd);
+			return doRegister(entity);
+		} else if (command.equals(Contants.COMMAND_SHOW_TXT_CATEGORY)) { // 显示小说分类
+			return doShowTxtCategory(entity);
 		}
 		return new Entity();
+	}
+
+	// 显示小说分类
+	public Entity doShowTxtCategory(Entity entity) {
+		List<String> list = bb.getAllTxtCategory();
+		entity.setObj(list);
+		entity.setIsSuccess(true);
+		// 日志
+		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		System.out.print(date + "\t=>\t");
+		// 获取客户端的IP地址
+		InetAddress ia = socket.getInetAddress();
+		System.out.println(ia.getHostAddress() + "执行命令：" + entity.getCommand());
+		return entity;
 	}
 
 	// 注册

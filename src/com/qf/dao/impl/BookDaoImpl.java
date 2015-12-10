@@ -30,12 +30,12 @@ public class BookDaoImpl implements BookDao {
 		return result > 0 ? true : false;
 	}
 
-	@Override
 	/**
 	 * 根据小说分类获取该分类下所有的小说
 	 * @param type 小说分类
 	 * @return 获取的小说集合
 	 */
+	@Override
 	public List<Book> getBookByType(String type) {
 		List<Book> list = new ArrayList<Book>();
 		ResultSet rs = db.executeQuery("SELECT name,author,summary,filename,type FROM tb_book WHERE type=?", type);
@@ -82,6 +82,26 @@ public class BookDaoImpl implements BookDao {
 			db.close();
 		}
 		return book;
+	}
+
+	/**
+	 * 获取所有小说分类
+	 * @return 小说分类集合
+	 */
+	@Override
+	public List<String> getAllCategory() {
+		List<String> list = new ArrayList<String>();
+		ResultSet rs = db.executeQuery("SELECT type FROM tb_book GROUP BY type");
+		try {
+			while(rs.next()) {
+				list.add(rs.getString("type"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			db.close();
+		}
+		return list;
 	}
 
 }

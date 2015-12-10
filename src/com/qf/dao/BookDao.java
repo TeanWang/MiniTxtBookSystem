@@ -32,5 +32,11 @@ public interface BookDao {
 	 * @return 获取的小说对象，如果没有则返回<strong>null</strong>
 	 */
 	Book getBookByName(String name);
+	
+	/**
+	 * 获取所有小说分类
+	 * @return 小说分类集合
+	 */
+	List<String> getAllCategory();
 
 }

@@ -22,4 +22,9 @@ public class Contants {
 	 * 注册命令
 	 */
 	public static final String COMMAND_REGISTER = "CMD_REGISTER";
+	/**
+	 * 显示小说分类命令
+	 */
+	public static final String COMMAND_SHOW_TXT_CATEGORY = "CMD_SHOW_TXT_CATEGORY";
+	
 }

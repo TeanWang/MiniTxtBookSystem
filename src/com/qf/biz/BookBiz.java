@@ -42,5 +42,13 @@ public class BookBiz {
 	public Book getBookByName(String name) {
 		return bookDao.getBookByName(name);
 	}
+	
+	/**
+	 * 获取所有小说分类
+	 * @return 小说分类集合
+	 */
+	public List<String> getAllTxtCategory() {
+		return bookDao.getAllCategory();
+	}
 
 }

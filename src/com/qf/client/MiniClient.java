@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 import com.qf.entity.User;
@@ -81,10 +82,10 @@ public class MiniClient {
 			if (getConnection()) {
 				sendServerCommand(entity);
 				entity = getServerCommand();
+				closeSocket(); // 释放
 				// 打印注册结果信息
 				showXingHao(entity.getInfo());
 				if (entity.getIsSuccess()) { // 判断是否注册成功
-					closeSocket();
 					showLoginWindow(); // 进入登录界面
 				} else {
 					showRegisterWindow(); // 注册失败再次进入注册页面
@@ -117,16 +118,60 @@ public class MiniClient {
 		if (getConnection()) {
 			sendServerCommand(cmd);
 			cmd = getServerCommand();
+			closeSocket(); // 释放
 			// 打印登录结果信息
 			showXingHao(cmd.getInfo());
 			if (cmd.getIsSuccess()) { // 判断是否登录成功
-				// 显示小说列表 -- 未完待续
-				closeSocket();
+				// 显示小说列表
+				showTxtCategoryWindow();
 			} else {
-				showLoginWindow();
+				showLoginWindow(); // 重新登录
 			}
 		}
 		sc.close();
+	}
+
+	/**
+	 * 显示小说分类
+	 */
+	public void showTxtCategoryWindow() {
+		Entity entity = new Entity(Contants.COMMAND_SHOW_TXT_CATEGORY);
+		if(getConnection()) {
+			sendServerCommand(entity);
+			entity = getServerCommand();
+			closeSocket();
+			// 显示服务器响应信息
+			if(entity.getIsSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<String> list = (List<String>)entity.getObj();
+				String msg = "";
+				for (int i = 0; i < list.size() - 1; i++) {
+					msg += (i + 1) + ". " + list.get(i) + "\n";
+				}
+				showBoLang(msg + list.size() + ". " + list.get(list.size() - 1));
+				System.out.print("请选择：");
+				Scanner sc = new Scanner(System.in);
+				boolean flag = true;
+				int choose = 0;
+				while(flag) {
+					try {
+						choose = sc.nextInt();
+						if(choose < 1 || choose > list.size()) {
+							throw new Exception();
+						}
+						flag = false;
+					} catch (Exception e) {
+						sc.nextLine();
+						System.out.print("!-> 输入有误，请输入有效序号：");
+					}
+				}
+				String type = list.get(choose - 1);
+				System.out.println("您选择了：" + type);
+				sc.close();
+			}
+		} else {
+			System.out.println("!-> 链接服务器错误，请稍后再试！");
+		}
 	}
 
 	/**
