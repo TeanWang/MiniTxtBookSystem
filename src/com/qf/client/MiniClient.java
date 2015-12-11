@@ -1,5 +1,9 @@
 package com.qf.client;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -147,10 +151,10 @@ public class MiniClient {
 				@SuppressWarnings("unchecked")
 				List<String> list = (List<String>)entity.getObj();
 				String msg = "";
-				for (int i = 0; i < list.size() - 1; i++) {
+				for (int i = 0; i < list.size(); i++) {
 					msg += (i + 1) + ". " + list.get(i) + "\n";
 				}
-				showBoLang(msg + list.size() + ". " + list.get(list.size() - 1));
+				showBoLang(msg + (list.size() + 1) + ". 退出");
 				/* 获取用户输入的小说分类 */
 				System.out.print("请选择：");
 				Scanner sc = new Scanner(System.in);
@@ -159,7 +163,10 @@ public class MiniClient {
 				while(flag) {
 					try {
 						choose = sc.nextInt();
-						if(choose < 1 || choose > list.size()) {
+						if(choose == list.size() + 1) {
+							showXingHao("谢谢使用！！！");
+							System.exit(0); // 退出程序
+						} else  if(choose < 1 || choose > list.size()) {
 							throw new Exception();
 						}
 						flag = false;
@@ -247,10 +254,38 @@ public class MiniClient {
 	 */
 	public void download(Book b) {
 		showBoLang("当前操作：小说下载");
-		System.out.println(b.getName() + "\t" + b.getAuthor() + "\t" + b.getSummary());
+		System.out.println("!-> 正在下载小说：《" + b.getName() + "》");
 		Entity entity = new Entity(Contants.COMMAND_DOWNLOAD);
 		entity.setInfo(b.getName()); // 告诉服务器要下载的小说名称
-		// TODO 
+		// 与服务器连接
+		if(getConnection()) {
+			// TODO 下载小说
+			String path = ConfigManager.getInstance().getValue(Contants.TXT_DOWNLOAD_PATH);
+			try {
+				// 要下载的目标文件的流
+				FileOutputStream fos = new FileOutputStream(path + File.separator + b.getName()+ ".txt"); 
+				sendServerCommand(entity); // 向服务器发送命令
+				BufferedInputStream bis = new BufferedInputStream(clientSocket.getInputStream());
+				byte[] buf = new byte[1024 * 1024];
+				int len = -1;
+				while((len = bis.read(buf)) != -1) {
+					fos.write(buf, 0, len);
+				}
+				fos.close();
+				bis.close();
+				clientSocket.close();
+				showXingHao("下载完毕，文件位置：" + path  + b.getName()+ ".txt");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				System.out.println("!-> 文件不存在：" + path);
+			} catch (IOException e) {
+				e.printStackTrace();
+				showXingHao("下载失败，请检查网络！");
+			}
+		} else {
+			System.out.println("!-> 链接服务器错误，请稍后再试！");
+		}
+		showAllTxtByCategory(b.getType()); // 返回上级菜单			
 	}
 
 	/**

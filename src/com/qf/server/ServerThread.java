@@ -1,5 +1,10 @@
 package com.qf.server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -38,9 +43,42 @@ public class ServerThread implements Runnable {
 			OutputStream os = socket.getOutputStream(); // 获取输出流 = 写
 
 			ObjectInputStream ois = new ObjectInputStream(is);
-			ObjectOutputStream oos = new ObjectOutputStream(os);
 
 			Entity cmd = (Entity) ois.readObject(); // 获取客户端发送过来的对象数据
+			/* 下载 */
+			if(cmd.getCommand().equals(Contants.COMMAND_DOWNLOAD)) {
+				String type = cmd.getInfo(); // 获取要下载的小说名称
+				Book book = bb.getBookByName(type);
+				String fileName = book.getFileName(); // 获取小说的文件名称
+				// 获取小说的存放路径
+				String path = "data/" + fileName.substring(0, 6) + File.separator + fileName;
+				System.out.println(path);
+				FileInputStream fis = new FileInputStream(path); // 要下载的文件流
+				BufferedInputStream bis = new BufferedInputStream(fis);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				byte[] b = new byte[1024 * 1024];
+				int len = -1;
+				while((len = bis.read(b)) != -1) {
+					baos.write(b, 0, len);
+				}
+				BufferedOutputStream bos = new BufferedOutputStream(os);
+				bos.write(baos.toByteArray());
+				
+				bos.flush();
+				bos.close();
+				baos.close();
+				bis.close();
+				fis.close();
+				ois.close();
+				os.close();
+				is.close();
+				return;
+			} else if(Contants.COMMAND_UPLOAD.equals(cmd.getCommand())) { // 上传
+				
+			}
+			
+			/* 响应服务器 */
+			ObjectOutputStream oos = new ObjectOutputStream(os);
 			Entity command = executeCommand(cmd);
 
 			oos.writeObject(command);
