@@ -19,6 +19,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.qf.dao.Callback;
+import com.qf.dao.TimeForCode;
 import com.qf.entity.Book;
 import com.qf.entity.User;
 import com.qf.util.ConfigManager;
@@ -279,21 +281,21 @@ public class MiniClient {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] b = new byte[1024 * 5];
 			int len = -1;
-			while((len = bis.read(b)) != -1) {
+			while ((len = bis.read(b)) != -1) {
 				baos.write(b, 0, len);
 			}
 			entity.setObj(baos.toByteArray());
-			
+
 			baos.close();
 			bis.close();
 			fis.close();
-			//br.close();
-			
-			if(getConnection()) {
-				System.out.println("!-> 正在上传小说：《" + name+ "》");
+			// br.close();
+
+			if (getConnection()) {
+				System.out.println("!-> 正在上传小说：《" + name + "》");
 				sendServerCommand(entity); // 发送给服务器
 				entity = getServerCommand(); // 获取服务器响应
-				if(entity.getIsSuccess()) {
+				if (entity.getIsSuccess()) {
 					showXingHao("小说上传成功！");
 				} else {
 					showXingHao("小说上传失败！");
@@ -301,7 +303,7 @@ public class MiniClient {
 			} else {
 				System.out.println("!-> 链接服务器错误，请稍后再试！");
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -323,29 +325,44 @@ public class MiniClient {
 		entity.setInfo(b.getName()); // 告诉服务器要下载的小说名称
 		// 与服务器连接
 		if (getConnection()) {
-			// TODO 下载小说
 			String path = ConfigManager.getInstance().getValue(Contants.TXT_DOWNLOAD_PATH);
-			try {
-				// 要下载的目标文件的流
-				FileOutputStream fos = new FileOutputStream(path + File.separator + b.getName() + ".txt");
-				sendServerCommand(entity); // 向服务器发送命令
-				BufferedInputStream bis = new BufferedInputStream(clientSocket.getInputStream());
-				byte[] buf = new byte[1024 * 1024];
-				int len = -1;
-				while ((len = bis.read(buf)) != -1) {
-					fos.write(buf, 0, len);
+
+			/* 使用接口回调用来获取代码执行时间 */
+			TimeForCode tfc = new TimeForCode();
+			long mt = tfc.getTime(new Callback() {
+
+				@Override
+				public void code(Object... obj) {
+					Book b = (Book) obj[1];
+					Entity entity = (Entity) obj[2];
+					try {
+						// 要下载的目标文件的流
+						FileOutputStream fos = new FileOutputStream(obj[0] + File.separator + b.getName() + ".txt");
+						sendServerCommand(entity); // 向服务器发送命令
+						BufferedInputStream bis = new BufferedInputStream(clientSocket.getInputStream());
+						byte[] buf = new byte[1024 * 1024];
+						int len = -1;
+						while ((len = bis.read(buf)) != -1) {
+							fos.write(buf, 0, len);
+						}
+						fos.close();
+						bis.close();
+					} catch (FileNotFoundException e) {
+						System.out.println("!-> 文件不存在：" + obj[0]);
+					} catch (IOException e) {
+						showXingHao("下载失败，请检查网络！");
+					}
+
 				}
-				fos.close();
-				bis.close();
+			}, path, b, entity);
+
+			try {
 				clientSocket.close();
-				showXingHao("下载完毕，文件位置：" + path + b.getName() + ".txt");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				System.out.println("!-> 文件不存在：" + path);
 			} catch (IOException e) {
 				e.printStackTrace();
-				showXingHao("下载失败，请检查网络！");
 			}
+			showXingHao("下载完毕，耗时：" + mt + "ms, 文件位置：" + path + b.getName() + ".txt");
+
 		} else {
 			System.out.println("!-> 链接服务器错误，请稍后再试！");
 		}

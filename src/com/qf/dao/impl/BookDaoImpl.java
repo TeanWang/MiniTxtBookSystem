@@ -5,8 +5,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.qf.dao.BaseDao;
+import com.qf.dao.BaseDaoFactory;
 import com.qf.dao.BookDao;
-import com.qf.dao.DBHelper;
 import com.qf.entity.Book;
 
 /**
@@ -17,7 +18,7 @@ import com.qf.entity.Book;
  */
 public class BookDaoImpl implements BookDao {
 	
-	private DBHelper db = new DBHelper();
+	private BaseDao db = BaseDaoFactory.getInstance(1);
 	
 	@Override
 	/**

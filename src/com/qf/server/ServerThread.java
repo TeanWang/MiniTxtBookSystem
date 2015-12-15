@@ -55,7 +55,6 @@ public class ServerThread implements Runnable {
 				String fileName = book.getFileName(); // 获取小说的文件名称
 				// 获取小说的存放路径
 				String path = "data/" + fileName.substring(0, 6) + File.separator + fileName;
-				System.out.println(path);
 				FileInputStream fis = new FileInputStream(path); // 要下载的文件流
 				BufferedInputStream bis = new BufferedInputStream(fis);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -66,7 +65,7 @@ public class ServerThread implements Runnable {
 				}
 				BufferedOutputStream bos = new BufferedOutputStream(os);
 				bos.write(baos.toByteArray());
-				
+				log("下载小说：《" + book.getName() + "》成功！"); // 日志
 				bos.flush();
 				bos.close();
 				baos.close();
@@ -138,9 +137,7 @@ public class ServerThread implements Runnable {
 		File file  = new File(fp);
 		if(!file.exists()) {
 			if(file.mkdir()) {
-				System.out.println("OK");
-			} else {
-				System.out.println("Fail");
+				log("创建文件夹：" + fp);
 			}
 		}
 		try {
@@ -158,6 +155,7 @@ public class ServerThread implements Runnable {
 		} else {
 			entity.setIsSuccess(false);
 		}
+		log("上传小说：《" + book.getName() + "》成功！");
 		entity.setObj(null);
 		entity.setInfo(null);
 		return entity;
@@ -169,11 +167,7 @@ public class ServerThread implements Runnable {
 		entity.setObj(list);
 		entity.setIsSuccess(true);
 		// 日志
-		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-		System.out.print(date + "\t=>\t");
-		// 获取客户端的IP地址
-		InetAddress ia = socket.getInetAddress();
-		System.out.println(ia.getHostAddress() + "执行命令：" + entity.getCommand());
+		log("执行命令：" + entity.getCommand());
 		return entity;
 	}
 
@@ -183,11 +177,7 @@ public class ServerThread implements Runnable {
 		entity.setObj(list);
 		entity.setIsSuccess(true);
 		// 日志
-		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-		System.out.print(date + "\t=>\t");
-		// 获取客户端的IP地址
-		InetAddress ia = socket.getInetAddress();
-		System.out.println(ia.getHostAddress() + "执行命令：" + entity.getCommand());
+		log("执行命令：" + entity.getCommand());
 		return entity;
 	}
 
@@ -209,20 +199,12 @@ public class ServerThread implements Runnable {
 			entity.setIsSuccess(true);
 			entity.setInfo("注册成功！");
 			// 日志
-			String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-			System.out.print(date + "\t=>\t");
-			// 获取客户端的IP地址
-			InetAddress ia = socket.getInetAddress();
-			System.out.println(ia.getHostAddress() + "注册成功");
+			log("注册成功");
 		} else {
 			entity.setIsSuccess(false);
 			entity.setInfo("注册失败！");
 			// 日志
-			String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-			System.out.print(date + "\t=>\t");
-			// 获取客户端的IP地址
-			InetAddress ia = socket.getInetAddress();
-			System.out.println(ia.getHostAddress() + "注册失败了");
+			log("注册失败了");
 		}
 		return entity;
 	}
@@ -235,22 +217,23 @@ public class ServerThread implements Runnable {
 			entity.setIsSuccess(true);
 			entity.setInfo("登录成功！");
 			// 日志
-			String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-			System.out.print(date + "\t=>\t");
-			// 获取客户端的IP地址
-			InetAddress ia = socket.getInetAddress();
-			System.out.println(ia.getHostAddress() + "登录成功");
+			log("登录成功");
 		} else {
 			entity.setIsSuccess(false);
 			entity.setInfo("登录失败！");
 			// 日志
-			String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-			System.out.print(date + "\t=>\t");
-			// 获取客户端的IP地址
-			InetAddress ia = socket.getInetAddress();
-			System.out.println(ia.getHostAddress() + "登录失败");
+			log("登录失败");
 		}
 		return entity;
+	}
+	
+	// 打印日志
+	public void log(String msg) {
+		String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		System.out.print(date + "\t=>\t");
+		// 获取客户端的IP地址
+		InetAddress ia = socket.getInetAddress();
+		System.out.println(ia.getHostAddress() + msg);
 	}
 
 }

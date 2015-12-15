@@ -1,4 +1,4 @@
-package com.qf.dao;
+package com.qf.dao.impl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,14 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.qf.dao.BaseDao;
+
 /**
- * 数据库访问帮助类
- * 
+ * 针对SQLite实现的BaseDao
  * @author TeanWang
  *
  */
-public class DBHelper {
-	
+public class BaseDaoSQLiteImpl implements BaseDao {
+
 	private Connection conn;
 	private PreparedStatement pstmt;
 	private ResultSet rs;

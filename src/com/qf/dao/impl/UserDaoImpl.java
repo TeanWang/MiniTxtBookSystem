@@ -3,7 +3,8 @@ package com.qf.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.qf.dao.DBHelper;
+import com.qf.dao.BaseDao;
+import com.qf.dao.BaseDaoFactory;
 import com.qf.dao.UserDao;
 import com.qf.entity.User;
 
@@ -15,7 +16,7 @@ import com.qf.entity.User;
  */
 public class UserDaoImpl implements UserDao {
 	
-	private DBHelper db = new DBHelper();
+	private BaseDao db = BaseDaoFactory.getInstance(1);
 
 	@Override
 	/**
