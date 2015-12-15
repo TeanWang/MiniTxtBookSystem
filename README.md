@@ -24,7 +24,6 @@
 > **db** SQLite3数据库文件`minitxt.db`  
 > **jar** 项目所需的jar包文件夹，存放一个SQLite的驱动包和JSON解析的jar包  
 
-------
 
 ## 程序使用
 
