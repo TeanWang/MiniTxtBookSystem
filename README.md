@@ -16,11 +16,11 @@
 
 ## 程序文件结构
 
-> <i class="icon-file"></i> **src** 具体Java源代码  
-> <i class="icon-file"></i> **config** 存放小说的配置信息，如服务器IP地址和端口号及下载路径`保存在minitxt.properties`文件中
-> <i class="icon-file"></i> **data** 存放具体的小说文件，按照文件上传的日期划分文件夹
-> <i class="icon-file"></i> **db** SQLite3数据库文件`minitxt.db`
-> <i class="icon-file"></i> **jar** 项目所需的jar包文件夹，存放一个SQLite的驱动包和JSON解析的jar包
+> **src** 具体Java源代码  
+> **config** 存放小说的配置信息，如服务器IP地址和端口号及下载路径`保存在minitxt.properties`文件中
+> **data** 存放具体的小说文件，按照文件上传的日期划分文件夹
+> **db** SQLite3数据库文件`minitxt.db`
+> **jar** 项目所需的jar包文件夹，存放一个SQLite的驱动包和JSON解析的jar包
 
 ------
 
