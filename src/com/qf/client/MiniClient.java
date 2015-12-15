@@ -1,10 +1,14 @@
 package com.qf.client;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
@@ -68,8 +72,7 @@ public class MiniClient {
 	}
 
 	/**
-	 * 用户注册窗口，从控制台接收用户输入的用户名和密码，然后用正则判断是否符合要求，
-	 * 如果符合要求的用户名和密码封装成JSON对象发送到服务器端
+	 * 用户注册窗口，从控制台接收用户输入的用户名和密码，然后用正则判断是否符合要求， 如果符合要求的用户名和密码封装成JSON对象发送到服务器端
 	 */
 	public void showRegisterWindow() {
 		Scanner sc = new Scanner(System.in);
@@ -79,8 +82,8 @@ public class MiniClient {
 		System.out.print("请输入密码（数字字母下划线组成4~10位）：");
 		String userPwd = sc.next();
 		// 用正则验证是否合法
-		if(userName.matches("\\w{4,10}") && userPwd.matches("\\w{4,10}")) {
-			String json = "{name:'" + userName + "',pwd:'" + userPwd +"'}"; // 把用户名和密码封装成JSON发送给服务器
+		if (userName.matches("\\w{4,10}") && userPwd.matches("\\w{4,10}")) {
+			String json = "{name:'" + userName + "',pwd:'" + userPwd + "'}"; // 把用户名和密码封装成JSON发送给服务器
 			Entity entity = new Entity(Contants.COMMAND_REGISTER); // 创建带有注册命令的Entity对象
 			entity.setInfo(json);
 			/* 发送给服务器，并获取服务器响应的信息 */
@@ -141,15 +144,15 @@ public class MiniClient {
 	 */
 	public void showTxtCategoryWindow() {
 		Entity entity = new Entity(Contants.COMMAND_SHOW_TXT_CATEGORY);
-		if(getConnection()) {
+		if (getConnection()) {
 			sendServerCommand(entity);
 			entity = getServerCommand();
 			closeSocket();
 			// 显示服务器响应信息
-			if(entity.getIsSuccess()) {
+			if (entity.getIsSuccess()) {
 				/* 显示所有小说分类 */
 				@SuppressWarnings("unchecked")
-				List<String> list = (List<String>)entity.getObj();
+				List<String> list = (List<String>) entity.getObj();
 				String msg = "";
 				for (int i = 0; i < list.size(); i++) {
 					msg += (i + 1) + ". " + list.get(i) + "\n";
@@ -160,13 +163,13 @@ public class MiniClient {
 				Scanner sc = new Scanner(System.in);
 				boolean flag = true;
 				int choose = 0;
-				while(flag) {
+				while (flag) {
 					try {
 						choose = sc.nextInt();
-						if(choose == list.size() + 1) {
+						if (choose == list.size() + 1) {
 							showXingHao("谢谢使用！！！");
 							System.exit(0); // 退出程序
-						} else  if(choose < 1 || choose > list.size()) {
+						} else if (choose < 1 || choose > list.size()) {
 							throw new Exception();
 						}
 						flag = false;
@@ -186,17 +189,19 @@ public class MiniClient {
 
 	/**
 	 * 显示type分类下的所有小说
-	 * @param type 小说分类
+	 * 
+	 * @param type
+	 *            小说分类
 	 */
 	public void showAllTxtByCategory(String type) {
 		Entity entity = new Entity(Contants.COMMAND_SHOW_TXT_BY_CATEGORY);
 		entity.setInfo(type);
-		if(getConnection()) {
+		if (getConnection()) {
 			sendServerCommand(entity);
 			entity = getServerCommand();
 			// 输入响应的信息
 			@SuppressWarnings("unchecked")
-			List<Book> list = (List<Book>)entity.getObj();
+			List<Book> list = (List<Book>) entity.getObj();
 			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			System.out.println("序号\t书名\t作者\t摘要");
 			for (int i = 0; i < list.size(); i++) {
@@ -208,10 +213,10 @@ public class MiniClient {
 			Scanner sc = new Scanner(System.in);
 			boolean flag = true;
 			int choose = 0;
-			while(flag) {
+			while (flag) {
 				try {
 					choose = sc.nextInt();
-					if(choose > list.size() || choose < -1) {
+					if (choose > list.size() || choose < -1) {
 						throw new Exception();
 					}
 					flag = false;
@@ -220,12 +225,12 @@ public class MiniClient {
 					System.out.print("!-> 您的输入有误，请重新输入：");
 				}
 			}
-			if(choose == -1) {
+			if (choose == -1) {
 				// 上传新小说到该分类下
 				upload(type);
-			} else if(choose == 0) {
+			} else if (choose == 0) {
 				showTxtCategoryWindow(); // 返回上级菜单
-			} else { 
+			} else {
 				Book b = list.get(choose - 1);
 				download(b); // 下载小说
 			}
@@ -233,24 +238,83 @@ public class MiniClient {
 		} else {
 			System.out.println("!-> 链接服务器错误，请稍后再试！");
 		}
-		
+
 	}
-	
+
 	/**
 	 * 小说上传
-	 * @param type 要上传的分类
+	 * 
+	 * @param type
+	 *            要上传的分类
 	 */
 	public void upload(String type) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		showBoLang("当前操作：小说上传");
-		Entity entity = new Entity(Contants.COMMAND_UPLOAD);
-		
-		// TODO 
-		
+		try {
+			Entity entity = new Entity(Contants.COMMAND_UPLOAD); // 上传命令
+			System.out.print("请输入书名：");
+			String name = br.readLine();
+			System.out.print("请输入作者：");
+			String author = br.readLine();
+			System.out.print("请输入摘要：");
+			String summary = br.readLine();
+			System.out.print("请输入要上传的小说的目录：");
+			String path = br.readLine();
+			// 把小说信息封装在JSON数据中
+			String json = "{name:'" + name + "',author:'" + author + "',summary:'" + summary + "',type:'" + type + "'}";
+			entity.setInfo(json); // 把JSON信息封装在Entity中，待发送给服务器
+			FileInputStream fis = null;
+			boolean flag = true;
+			while (flag) {
+				try {
+					fis = new FileInputStream(path);
+					flag = false;
+				} catch (Exception e) {
+					System.out.print("您输入的路径有误，请重新请输入要上传的小说的目录：");
+					path = br.readLine();
+				}
+			}
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			/* 把要上传到文件读到内存流中 */
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			byte[] b = new byte[1024 * 5];
+			int len = -1;
+			while((len = bis.read(b)) != -1) {
+				baos.write(b, 0, len);
+			}
+			entity.setObj(baos.toByteArray());
+			
+			baos.close();
+			bis.close();
+			fis.close();
+			//br.close();
+			
+			if(getConnection()) {
+				System.out.println("!-> 正在上传小说：《" + name+ "》");
+				sendServerCommand(entity); // 发送给服务器
+				entity = getServerCommand(); // 获取服务器响应
+				if(entity.getIsSuccess()) {
+					showXingHao("小说上传成功！");
+				} else {
+					showXingHao("小说上传失败！");
+				}
+			} else {
+				System.out.println("!-> 链接服务器错误，请稍后再试！");
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			closeSocket();
+		}
+		showAllTxtByCategory(type); // 返回上级菜单
 	}
-	
+
 	/**
 	 * 小说下载
-	 * @param b 要下载的小说对象
+	 * 
+	 * @param b
+	 *            要下载的小说对象
 	 */
 	public void download(Book b) {
 		showBoLang("当前操作：小说下载");
@@ -258,23 +322,23 @@ public class MiniClient {
 		Entity entity = new Entity(Contants.COMMAND_DOWNLOAD);
 		entity.setInfo(b.getName()); // 告诉服务器要下载的小说名称
 		// 与服务器连接
-		if(getConnection()) {
+		if (getConnection()) {
 			// TODO 下载小说
 			String path = ConfigManager.getInstance().getValue(Contants.TXT_DOWNLOAD_PATH);
 			try {
 				// 要下载的目标文件的流
-				FileOutputStream fos = new FileOutputStream(path + File.separator + b.getName()+ ".txt"); 
+				FileOutputStream fos = new FileOutputStream(path + File.separator + b.getName() + ".txt");
 				sendServerCommand(entity); // 向服务器发送命令
 				BufferedInputStream bis = new BufferedInputStream(clientSocket.getInputStream());
 				byte[] buf = new byte[1024 * 1024];
 				int len = -1;
-				while((len = bis.read(buf)) != -1) {
+				while ((len = bis.read(buf)) != -1) {
 					fos.write(buf, 0, len);
 				}
 				fos.close();
 				bis.close();
 				clientSocket.close();
-				showXingHao("下载完毕，文件位置：" + path  + b.getName()+ ".txt");
+				showXingHao("下载完毕，文件位置：" + path + b.getName() + ".txt");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				System.out.println("!-> 文件不存在：" + path);
@@ -285,7 +349,7 @@ public class MiniClient {
 		} else {
 			System.out.println("!-> 链接服务器错误，请稍后再试！");
 		}
-		showAllTxtByCategory(b.getType()); // 返回上级菜单			
+		showAllTxtByCategory(b.getType()); // 返回上级菜单
 	}
 
 	/**

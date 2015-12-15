@@ -5,6 +5,9 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -56,7 +59,7 @@ public class ServerThread implements Runnable {
 				FileInputStream fis = new FileInputStream(path); // 要下载的文件流
 				BufferedInputStream bis = new BufferedInputStream(fis);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				byte[] b = new byte[1024 * 1024];
+				byte[] b = new byte[1024 * 5];
 				int len = -1;
 				while((len = bis.read(b)) != -1) {
 					baos.write(b, 0, len);
@@ -73,8 +76,6 @@ public class ServerThread implements Runnable {
 				os.close();
 				is.close();
 				return;
-			} else if(Contants.COMMAND_UPLOAD.equals(cmd.getCommand())) { // 上传
-				
 			}
 			
 			/* 响应服务器 */
@@ -109,8 +110,57 @@ public class ServerThread implements Runnable {
 			return doShowTxtCategory(entity);
 		} else if (command.equals(Contants.COMMAND_SHOW_TXT_BY_CATEGORY)) { // 显示指定分类下的小说
 			return doShowAllTxtByCategory(entity);
+		} else if (command.equals(Contants.COMMAND_UPLOAD)) { // 上传小说
+			return doUploadTxt(entity);
 		}
 		return new Entity();
+	}
+
+	// 上传小说
+	public Entity doUploadTxt(Entity entity) {
+		String json = entity.getInfo(); // 获取小说信息JSON
+		Book book = new Book();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		String now = sdf.format(new Date());
+		try {
+			JSONObject obj = new JSONObject(json);
+			book.setName(obj.getString("name"));
+			book.setAuthor(obj.getString("author"));
+			book.setSummary(obj.getString("summary"));
+			book.setType(obj.getString("type"));
+			book.setFileName(now + "_" + obj.getString("name") + ".txt");
+		} catch (JSONException e) {
+			System.out.println("!-> 要上传的小说信息有误！");
+			e.printStackTrace();
+		}
+		// 把小说保存在服务器
+		String fp = "data" + File.separator + book.getFileName().substring(0, 6);
+		File file  = new File(fp);
+		if(!file.exists()) {
+			if(file.mkdir()) {
+				System.out.println("OK");
+			} else {
+				System.out.println("Fail");
+			}
+		}
+		try {
+			FileOutputStream fos = new FileOutputStream(fp + File.separator + book.getFileName());
+			fos.write((byte[])entity.getObj());
+			fos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// 把小说信息保存在数据库中
+		if(bb.addBook(book)) {
+			entity.setIsSuccess(true);
+		} else {
+			entity.setIsSuccess(false);
+		}
+		entity.setObj(null);
+		entity.setInfo(null);
+		return entity;
 	}
 
 	// 显示指定分类下的所有小说
